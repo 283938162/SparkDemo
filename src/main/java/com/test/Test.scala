@@ -1,5 +1,6 @@
 package com.test
 
+import org.apache.hadoop.fs.Path
 import org.apache.spark.{SparkConf, SparkContext}
 
 object Test {
@@ -36,19 +37,41 @@ object Test {
     //    rdd.map(x => {
     //      x.toUpperCase
     //    }).foreach(println)
+    //
+    //    val cols = Array("id", "name", "age", "id")
+    //
+    //    //    cols.toSet[String].foreach(print)
+    //
+    //    sc.parallelize(cols).foreachPartition(record => {
+    //      record.foreach(x => {
+    ////        println(x)
+    //        println("AA")
+    //      })
+    //      println("BB")
+    //    })
+    //
+    //    sc.stop()
 
-    val cols = Array("id", "name", "age", "id")
+//
+//    val path = new Path("ml_model/lrmodel")
+//    val hadoopConf = sc.hadoopConfiguration
+//    val hdfs = org.apache.hadoop.fs.FileSystem.get(hadoopConf)
+//    if (hdfs.exists(path)) {
+//      //递归删除
+//      //hdfs.delete(path,true)
+//      true
+//    } else {
+//      false
+//    }
 
-    //    cols.toSet[String].foreach(print)
+    val arr = Array(1,2,3,4,5,6,7,8,9,10)
+    val data = sc.parallelize(arr)
+    //https://blog.csdn.net/SA14023053/article/details/51993727
+    val Array(trainingData,testData) = data.randomSplit(Array(0.7,0.3))
+    trainingData.collect().foreach(print)
+    println()
+    testData.collect().foreach(print)
 
-    sc.parallelize(cols).foreachPartition(record => {
-      record.foreach(x => {
-//        println(x)
-        println("AA")
-      })
-      println("BB")
-    })
 
-    sc.stop()
   }
 }

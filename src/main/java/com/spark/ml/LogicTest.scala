@@ -1,7 +1,8 @@
 package com.spark.ml
 
+import com.test.CommonUtils
 import org.apache.spark.ml._
-import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.SparkSession
 
@@ -11,6 +12,12 @@ import org.apache.spark.sql.SparkSession
   *
   * 关于SparkMLlib的基础数据结构Spark-MLlib-Basics
   * https://blog.csdn.net/canglingye/article/details/41316193
+  *
+  * 逻辑回归本质上也是一种线性回归，和普通线性回归不同的是，普通线性回归特征到结果输出的是连续值，
+  * 而逻辑回归增加了一个函数g(z)，能够把连续值映射到0或者1。
+  *
+  * 优秀的博文
+  * https://blog.csdn.net/jediael_lu/article/details/76509707
   */
 object LogicTest {
 
@@ -66,6 +73,17 @@ object LogicTest {
     // flase 不折叠数据
     training.show(false)
 
+    /**
+      *
+      * +-----+----------------------------------+
+      * |label|features                          |
+      * +-----+----------------------------------+
+      * |1.0  |(692,[10,20,30],[-1.0,1.5,1.3])   |
+      * |0.0  |(692,[45,175,500],[-1.0,1.5,1.3]) |
+      * |1.0  |(692,[100,200,300],[-1.0,1.5,1.3])|
+      * +-----+----------------------------------+
+      */
+
     //建立逻辑回归模型,设置回归模型参数
     val lr = new LogisticRegression()
       .setMaxIter(10)
@@ -77,7 +95,70 @@ object LogicTest {
 
     // 打印模型信息
     println(s"Coefficients: ${lrModel.coefficients},Intercept: ${lrModel.intercept}")
-//    println("Coefficients:"+lrModel.coefficients+",intercept:"+lrModel.intercept)
+    //    println("Coefficients:"+lrModel.coefficients+",intercept:"+lrModel.intercept)
+
+    /**
+      * Coefficients:(692,[45,175,500],[0.48944928041408226,-0.32629952027605463,-0.37649944647237077]),
+      * intercept:1.251662793530725
+      *
+      */
+
+    //3 建立多元回归模型
+    val mlr = new LogisticRegression()
+      .setMaxIter(10) // 最大的迭代次数，当达到这个次数时，不管是否已经收敛到最小误差，均会结束训练。默认值为100。
+      .setRegParam(0.3) //setRegParam：正则化参数
+      .setElasticNetParam(0.8) // 默认值为0.0，这是一个L2惩罚。用于防止过拟合的另一种方式
+      .setFamily("multinomial") // 这是2.1才引入的参数，可设置二项式还是多项式模型。
+
+    //3 根据训练样本进行模型训练
+    val mlrModel = mlr.fit(training)
+
+    //3 打印模型信息
+    println(s"Multinomial coefficients: ${mlrModel.coefficientMatrix}")
+    println(s"Multinomial intercepts: ${mlrModel.interceptVector}")
+
+    /**
+      * Multinomial coefficients: 2 x 692 CSCMatrix
+      * (0,45) -0.2610332862832527
+      * (1,45) 0.2610332862832519
+      * (0,175) 0.17402219085550177
+      * (1,175) -0.17402219085550127
+      * (0,500) 0.20079483560250153
+      * (1,500) -0.20079483560250128
+      * Multinomial intercepts: [-0.6449310568167714,0.6449310568167714]
+      */
+
+    //4 测试样本
+    val test = spark.createDataFrame(Seq(
+      (1.0, Vectors.sparse(692, Array(10, 20, 30), Array(-1.0, 1.5, 1.3))),
+      (0.0, Vectors.sparse(692, Array(45, 175, 500), Array(-1.0, 1.5, 1.3))),
+      (1.0, Vectors.sparse(692, Array(100, 200, 300), Array(-1.0, 1.5, 1.3))))).toDF("label", "features")
+    test.show(false)
+
+    //5 对模型进行测试 返回的是DF格式  包含如下的字段
+    val test_predict = lrModel.transform(test)
+    test_predict
+      .show(false)
+
+    /**
+      * probablity 概率 [A,B]  A代表不是改标签的概率 B代表是该标签的概率 A+B=1
+      * +-----+----------------------------------+----------------------------------------+----------------------------------------+----------+
+      * |label|features                          |rawPrediction                           |probability                             |prediction|
+      * +-----+----------------------------------+----------------------------------------+----------------------------------------+----------+
+      * |1.0  |(692,[10,20,30],[-1.0,1.5,1.3])   |[-1.251662793530725,1.251662793530725]  |[0.22241243403014824,0.7775875659698517]|1.0       |
+      * |0.0  |(692,[45,175,500],[-1.0,1.5,1.3]) |[0.2166850477115212,-0.2166850477115212]|[0.5539602964649871,0.44603970353501293]|0.0       |
+      * |1.0  |(692,[100,200,300],[-1.0,1.5,1.3])|[-1.251662793530725,1.251662793530725]  |[0.22241243403014824,0.7775875659698517]|1.0       |
+      * +-----+----------------------------------+----------------------------------------+----------------------------------------+----------+
+      */
+
+    // 模型调优
+
+    //模型的保存与加载
+//    lrModel.save("ml_model/lrmodel")
+
+    val load_lrModel = LogisticRegressionModel.load("ml_model/lrmodel")
+    load_lrModel.transform(test).show(false)
+
 
   }
 }
