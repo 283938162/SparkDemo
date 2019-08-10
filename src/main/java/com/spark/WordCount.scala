@@ -14,6 +14,6 @@ object WordCount {
     //从文件中获取数据
     val input = sc.textFile("/Users/anus/IdeaProjects/SparkDemo/input/wordcount_input.txt")
     //分析并排序输出统计结果
-    input.flatMap(line => line.split("  ")).map(word => (word, 1)).reduceByKey((x, y) => x + y).sortBy(_._2,false).foreach(println _)
+    input.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey((x, y) => x + y).sortBy(_._2,false).foreach(println _)
   }
 }

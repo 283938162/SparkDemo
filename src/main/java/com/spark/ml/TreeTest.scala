@@ -10,6 +10,12 @@ import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.sql.SparkSession
 
+
+/**
+  * 机器学习各项指标
+  * https://blog.csdn.net/weixin_42111770/article/details/81015809
+  */
+
 object TreeTest {
   def main(args: Array[String]): Unit = {
     // 0.构建 Spark 对象

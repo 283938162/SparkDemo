@@ -37,8 +37,10 @@ object ScalaDemo {
 //    list1.add("a")
 
 
-    var arr= Array(("a",1),("b",2))
-    println(arr.toMap)
+//    var arr= Array(("a",1),("b",2))
+//    println(arr.toMap)
+
+
 
 
 
