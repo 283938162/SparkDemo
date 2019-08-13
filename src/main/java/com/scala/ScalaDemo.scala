@@ -7,6 +7,7 @@ import scala.io.Source
 
 object ScalaDemo {
   def main(argsl: Array[String]): Unit = {
+    print("Helo")
     //    val dirfile = new File("input/wprdcount")
     //    val files = dirfile.listFiles()
     //    for (file <- files) println(file)
