@@ -6,8 +6,15 @@ import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.mllib.classification.{LogisticRegressionModel, LogisticRegressionWithLBFGS, LogisticRegressionWithSGD}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.util.MLUtils
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 
+/**
+  *
+  * spark MLlib中的逻辑回归
+  * https://www.jianshu.com/p/1002ba629549
+  *
+  */
 object linear_models {
 
   def logistic_regression(): Unit = {
@@ -85,8 +92,86 @@ object linear_models {
     }
   }
 
+//完全是spark2.x 使用ml包 api实现的机器学习 跟Python相似
+  def logistic_regression_1(): Unit = {
+    import org.apache.spark.ml.classification.LogisticRegression
+    // Load training data
+    val spark = SparkSession.builder().master("local").appName("logistc_regression").getOrCreate()
+    Logger.getRootLogger.setLevel(Level.WARN)
+    import spark.implicits._
+
+    val training = spark.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
+    val lr = new LogisticRegression()
+      .setMaxIter(10)
+      .setRegParam(0.3)
+      .setElasticNetParam(0.8)
+    // Fit the model
+    val lrModel = lr.fit(training)
+    // Print the coefficients and intercept for logistic regression
+    println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
+    // We can also use the multinomial family for binary classification(二元分类)
+    val mlr = new LogisticRegression()
+      .setMaxIter(10)
+      .setRegParam(0.3)
+      .setElasticNetParam(0.8)
+      .setFamily("multinomial")
+    val mlrModel = mlr.fit(training)
+    // Print the coefficients and intercepts for logistic regression with multinomial family
+    println(s"Multinomial coefficients: ${mlrModel.coefficientMatrix}")
+    println(s"Multinomial intercepts: ${mlrModel.interceptVector}")
+    //多分类与上述类似，
+  }
+
+  def predict_cancer(): Unit = {
+    import org.apache.spark.mllib.classification.LogisticRegressionWithSGD
+    import org.apache.spark.mllib.evaluation.MulticlassMetrics
+    import org.apache.spark.mllib.linalg.Vectors
+    import org.apache.spark.mllib.regression.LabeledPoint
+    import org.apache.spark.mllib.util.MLUtils
+    import org.apache.spark.{SparkConf, SparkContext}
+
+    val conf = new SparkConf() //创建环境变量
+      .setMaster("local")      //设置本地化处理
+      .setAppName("LogisticRegression4")//设定名称
+    val sc = new SparkContext(conf)
+
+      val data = MLUtils.loadLibSVMFile(sc, "input/cancer.txt")	//读取数据文件,一定注意文本格式
+      val splits = data.randomSplit(Array(0.7, 0.3), seed = 11L)	//对数据集切分
+      val parsedData = splits(0)		//分割训练数据
+      val parseTtest = splits(1)		//分割测试数据
+
+
+      // 取对应索引的特征值
+      println(parsedData.first().features(0))
+
+     // 特征数量  parsedData RDD 数据集  first 取第一个 fretures 获取特征 size 获取长度
+    println(parsedData.first().features.size)
+
+
+    parsedData.foreach(println)
+//      val model = LogisticRegressionWithSGD.train(parsedData,50)	//训练模型
+//
+//      val predictionAndLabels = parseTtest.map {//计算测试值
+//        case LabeledPoint(label, features) =>	//计算测试值
+//          val prediction = model.predict(features)//计算测试值
+//          (prediction, label)			//存储测试和预测值
+//      }
+//
+//      val metrics = new MulticlassMetrics(predictionAndLabels)//创建验证类
+//      val precision = metrics.precision			//计算验证值
+//      println("Precision = " + precision)	//打印验证值
+//
+//      val patient = Vectors.dense(Array(70,3,180.0,4,3))	//计算患者可能性
+//      if(patient == 1) println("患者的胃癌有几率转移。")//做出判断
+//      else println("患者的胃癌没有几率转移。")	//做出判断
+      //Precision = 0.3333333333333333
+      //患者的胃癌没有几率转移。
+  }
+
   def main(args: Array[String]): Unit = {
-    logistic_regression()
+//    logistic_regression()
+//    logistic_regression_1()
+      predict_cancer()
   }
 
 }
