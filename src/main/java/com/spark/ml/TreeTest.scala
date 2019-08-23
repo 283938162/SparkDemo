@@ -14,6 +14,9 @@ import org.apache.spark.sql.SparkSession
 /**
   * 机器学习各项指标
   * https://blog.csdn.net/weixin_42111770/article/details/81015809
+  *
+  * https://blog.csdn.net/wangkai198911/article/details/78900770
+  *
   */
 
 object TreeTest {
@@ -37,6 +40,8 @@ object TreeTest {
     data.show(false)
 
     //2 标签进行索引编号
+    // 将输入列映射为ml列
+    // 将所有数据进行映射
     val labelIndexer = new StringIndexer().
       setInputCol("label").
       setOutputCol("indexedLabel").
@@ -47,6 +52,14 @@ object TreeTest {
 
     // 对离散特征进行标记索引，以用来确定哪些特征是离散特征
     // 如果一个特征的值超过4个以上，该特征视为连续特征，否则将会标记得离散特征并进行索引编号
+
+    // Automatically identify categorical features, and index them.
+    // 自动识别分类特征，并且对其建立索引
+
+    // Set maxCategories so features with > 4 distinct values are treated as continuous.
+    //通过setMaxCategories自动识别哪些特征是类别型的，并将原始值转化为类别索引。其他特征认为是连续型的不做为分类特征
+    //不要把所有特征都作为分类特征来使用
+
     val featureIndexer = new VectorIndexer().
       setInputCol("features").
       setOutputCol("indexedFeatures").
@@ -64,7 +77,7 @@ object TreeTest {
       setLabelCol("indexedLabel").
       setFeaturesCol("indexedFeatures")
 
-    //4 训练随机森林模型
+    // 训练随机森林模型，labal列为上文的labelIndexer，特征列为indexedFeatures
     val rf = new RandomForestClassifier()
       .setLabelCol("indexedLabel")
       .setFeaturesCol("indexedFeatures")

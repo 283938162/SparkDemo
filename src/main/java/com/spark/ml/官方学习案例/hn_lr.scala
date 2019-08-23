@@ -9,10 +9,12 @@ import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{DataType, DoubleType, StringType}
-import org.apache.spark.ml.linalg.{Vector, Vectors}
-import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.mllib.classification.{LogisticRegressionWithLBFGS, LogisticRegressionWithSGD}
+import org.apache.spark.mllib.regression.LinearRegressionWithSGD
 
+
+// 新旧不要写一起 导包冲突很恶心
 
 /**
   * 湖南 根因定位 spark
@@ -41,7 +43,7 @@ object hn_lr {
       .option("inferSchema", "true")
       .load("input/train.csv")
 
-    data.show(5)
+//    data.show(5)
     import org.apache.spark.sql.functions._
     import spark.implicits._ // 一定要加这个不然很多报错
 
@@ -57,7 +59,7 @@ object hn_lr {
 
     //    Map featues names to indices
     val featuresIndices = List("R1", "R2").map(df.columns.indexOf(_))
-    featuresIndices.foreach(println)
+//    featuresIndices.foreach(println)
 
     //Get index of target
     val labelIndex = data.columns.indexOf("Y1")
@@ -69,7 +71,7 @@ object hn_lr {
 
     // RDD[LabeledPoint] 转 DataFrame
     val dataF = spark.createDataFrame(LabeledPointRdd).select("label", "features")
-    dataF.show()
+//    dataF.show()
 
 
     // 以上阶段都是数据准备阶段
@@ -93,18 +95,15 @@ object hn_lr {
 
     // 创建LR分类器(Estimator)
     val lr = new LogisticRegression()
-      .setMaxIter(10000)
+      .setMaxIter(100)
       .setRegParam(0.1)
 
     //训练分类器,生成模型(Trandformer)
     val lrModel = lr.fit(trainingData)
 
 
-
-
-
     // 打印参数 这个是输入模型的参数
-    println("Model 1 was fit using parameters: " + lrModel.parent.extractParamMap)
+//    println("Model 1 was fit using parameters: " + lrModel.parent.extractParamMap)
 
     //怎么打印特征权重?和 模型偏执
     println(s"Coefficients:${lrModel.coefficients}, Intercept:${lrModel.intercept}")
@@ -112,7 +111,7 @@ object hn_lr {
 
     //用训练好的模型验证测试数据  transform的作用
     val res = lrModel.transform(testData)
-    res.printSchema()
+//    res.printSchema()
     //    root
     //    |-- label: double (nullable = false)
     //    |-- features: vector (nullable = true)
@@ -137,7 +136,7 @@ object hn_lr {
   }
 
   def main(args: Array[String]): Unit = {
-      new_ml_api()
+    new_ml_api()
   }
 
 }

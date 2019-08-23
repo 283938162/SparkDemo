@@ -51,50 +51,23 @@
             </exclusions>
         </dependency>
 
-        <!--tried to access method com.google.common.base.Stopwatch.<init>()V from class org.apache.hadoop.mapred.FileInputFormat-->
-        <!--这个依赖会报错!-->
-        <!-- https://mvnrepository.com/artifact/org.jpmml/jpmml-sparkml -->
-        <!--<dependency>-->
-            <!--<groupId>org.jpmml</groupId>-->
-            <!--<artifactId>jpmml-sparkml</artifactId>-->
-            <!--<version>1.2.13</version>-->
-        <!--</dependency>-->
-
-        <!--这个版本没问题 2016-->
         <dependency>
             <groupId>org.jpmml</groupId>
             <artifactId>jpmml-sparkml</artifactId>
-            <version>1.0.0</version>
+            <version>1.2.14</version>
         </dependency>
 
-         <!--https://mvnrepository.com/artifact/org.jpmml/jpmml-sparkml-->
-        <!--目前最新版本-->
-        <!--<dependency>-->
-            <!--<groupId>org.jpmml</groupId>-->
-            <!--<artifactId>jpmml-sparkml</artifactId>-->
-            <!--<version>1.5.4</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>ml.dmlc</groupId>
+            <artifactId>xgboost4j-spark</artifactId>
+            <version>0.81</version>
+        </dependency>
 
-
-
-        <!--<dependency>-->
-            <!--<groupId>org.jpmml</groupId>-->
-            <!--<artifactId>pmml-evaluator</artifactId>-->
-            <!--<version>1.2.15</version>-->
-        <!--</dependency>-->
-
-
-        <!--<dependency>-->
-            <!--<groupId>ml.dmlc</groupId>-->
-            <!--<artifactId>xgboost4j-spark</artifactId>-->
-            <!--<version>0.81</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>org.jpmml</groupId>-->
-            <!--<artifactId>jpmml-xgboost</artifactId>-->
-            <!--<version>1.3.3</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.jpmml</groupId>
+            <artifactId>jpmml-xgboost</artifactId>
+            <version>1.3.3</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
